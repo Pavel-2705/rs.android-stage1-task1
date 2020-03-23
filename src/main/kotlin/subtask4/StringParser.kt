@@ -1,5 +1,7 @@
 package subtask4
 
+import java.util.*
+
 class StringParser {
 
     // TODO: Complete the following function
@@ -9,24 +11,51 @@ class StringParser {
             '[', ']',
             '(', ')'
         )
-        val myIndexes = intArrayOf()
+        val simple = Stack<StringBuilder>()
+        val triangle = Stack<StringBuilder>()
+        val square = Stack<StringBuilder>()
+        val output = mutableListOf<String>()
+        var count = 0
+        val map = hashMapOf<Int, StringBuilder>()
+        for (c in inputString) {
+            when (c) {
+                delimiter[0], delimiter[2], delimiter[4] -> {
+                    updateStacks(simple, triangle, square, c)
+                    val builder = StringBuilder()
+                    when (c) {
+                        delimiter[0] -> triangle.push(builder)
+                        delimiter[2] -> square.push(builder)
+                        delimiter[4] -> simple.push(builder)
+                    }
+                    map.put(count++, builder)
+                }
 
-        inputString.forEachIndexed { index, char ->
-            when (char) {
-                delimiter[0] -> myIndexes[0] = (index)
-                delimiter[1] -> myIndexes[1] = (index)
-                delimiter[2] -> myIndexes[2] = (index)
-                delimiter[3] -> myIndexes[3] = (index)
-                delimiter[4] -> myIndexes[4] = (index)
-                delimiter[5] -> myIndexes[5] = (index)
+                delimiter[1], delimiter[3], delimiter[5] -> {
+                    when (c) {
+                        delimiter[1] -> if (!triangle.empty()) output.add(triangle.pop().toString())
+                        delimiter[3] -> if (!square.empty()) output.add((square.pop().toString()))
+                        delimiter[5] -> if (!simple.empty()) output.add(simple.pop().toString())
+                    }
+                    updateStacks(simple, triangle, square, c)
+                }
+                else -> updateStacks(simple, triangle, square, c)
             }
+
         }
 
-        val output = mutableListOf<String>()
-        output.add(inputString.substring(myIndexes[0], myIndexes[1]))
-        output.add(inputString.substring(myIndexes[2], myIndexes[3]))
-        output.add(inputString.substring(myIndexes[3], myIndexes[4]))
+        val outputArray = mutableListOf<String>()
+        for (i in 0 until map.size) outputArray.add(map[i].toString())
+        return outputArray.toTypedArray()
+    }
 
-        return output.toTypedArray()
+    private fun updateStacks(
+        simple: Stack<StringBuilder>,
+        triangle: Stack<StringBuilder>,
+        square: Stack<StringBuilder>,
+        c: Char
+    ) {
+        for (s in simple) s.append(c)
+        for (t in triangle) t.append(c)
+        for (q in square) q.append(c)
     }
 }
